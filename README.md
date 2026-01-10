@@ -1,6 +1,6 @@
-# Cooking up a Network Manager Part 2
+# Cooking up a Network Manager
 
-![AppIcon128](Images/AppIcon128.png) This is the **completed Source Code** for the 1st video (Part 1) in the Cooking Up a Network Manager series and also services as the **starter project** for the 2nd video.
+![AppIcon128](Images/AppIcon128.png) This is the **completed Source Code** for the **1st video (Part 1)** in the Cooking Up a Network Manager series and also services as the **starter project** for the 2nd video.
 
 Release Date: Feb 22, 2026
 
