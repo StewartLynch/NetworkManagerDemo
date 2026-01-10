@@ -24,6 +24,7 @@ struct Joke:Identifiable, Codable {
 
 struct JokesView: View {
     @State private var jokes: [Joke]? = nil
+    let manager = NetworkManager.shared
     var body: some View {
         Group {
             if let jokes {
@@ -39,6 +40,9 @@ struct JokesView: View {
             } else {
                 ContentUnavailableView("No Jokes available", systemImage: "hand.thumbsdown.fill")
             }
+        }
+        .task {
+            jokes = await manager.fetchAndDecodeJSON(from: TestURL.jokesURL)
         }
     }
 }

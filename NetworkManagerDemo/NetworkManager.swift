@@ -1,4 +1,4 @@
-//z
+//
 //----------------------------------------------
 // Original project: NetworkManagerDemo
 //
@@ -13,61 +13,14 @@
 //----------------------------------------------
 // Copyright © 2026 CreaTECH Solutions (Stewart Lynch). All rights reserved.
 
-enum TestURL {
-    static let quotesURL = "https://stewartlynch.github.io/Samples/quotes.json"
-    static let quotesURLRequestError = "https://invalid.stewartlynch.github.io/Samples/quotes.json"
-    static let quotesURLResponseError = "data:text/plain,hello"
-    static let quotesURLStatusError = "https://httpbin.org/status/500"
-    static let quotesURLBadJSON = "https://stewartlynch.github.io/Samples/errorQuotes.json"
-    
-    static let jokesURL = "https://stewartlynch.github.io/Samples/jokes.json"
-    
-    static let quotes2URL = "https://stewartlynch.github.io/Samples/quotes2.json"
-}
 
-struct Quote: Decodable, Identifiable {
-    let id: Int
-    let text: String
-    let author: String
-    let entryDate: Date
-}
+import Foundation
 
-import SwiftUI
-
-struct QuotesView: View {
-    @State private var quotes: [Quote]? = nil
-    let manager = NetworkManager.shared
-    var body: some View {
-        Group {
-            if let quotes {
-                List(quotes.shuffled()) { quote in
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(quote.text)
-                            .font(.headline)
-                        HStack {
-                            Text(quote.author)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            Text(quote.entryDate, format: .dateTime.month().day().year())
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-                .listStyle(.plain)
-            } else {
-                ContentUnavailableView("No Quotes available", systemImage: "quote.closing")
-            }
-        }
-        .task {
-//            quotes = await fetchAndDecodeQuotes(from: TestURL.quotesURLBadJSON)
-            quotes = await manager.fetchAndDecodeJSON(from: TestURL.quotesURL)
-        }
-    }
+class NetworkManager {
+    static let shared = NetworkManager()
+    private init() {}
     
-    func fetchAndDecodeQuotes(from url:String) async -> [Quote]? {
+    func fetchAndDecodeJSON<T: Decodable>(from url:String, configureDecoder: ((JSONDecoder) -> ())? = nil) async -> T? {
         guard let url = URL(string: url) else {
             print("Invalid URL")
             return nil
@@ -84,13 +37,14 @@ struct QuotesView: View {
             }
             do {
                 let decoder = JSONDecoder()
-                return try decoder.decode([Quote].self, from: data)
+                configureDecoder?(decoder)
+                return try decoder.decode(T.self, from: data)
             } catch let error as DecodingError {
                 print(decodingError(error: error))
                 return nil
             } catch {
                 print("Decoding error: \(error.localizedDescription)")
-                print("Data as string: \(String(data: data, encoding: .utf8) ?? "")")
+                print("Data as string: \(String(data: data, encoding: .utf8) ?? "Unable to convert data to String")")
                 return nil
             }
         } catch {
@@ -128,16 +82,8 @@ struct QuotesView: View {
             """
         @unknown default:
             """
-            Unkown error: \(error.localizedDescription)
+            Unknown error: \(error.localizedDescription)
             """
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        QuotesView()
-            .navigationTitle(ViewOption.first.title)
-            .toolbarTitleDisplayMode(.inlineLarge)
     }
 }
