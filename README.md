@@ -1,4 +1,4 @@
-# Cooking up a Network Manager
+# Cooking up a Network Manager Part 2
 
 ![AppIcon128](Images/AppIcon128.png) This is the **completed Source Code** for the 1st video (Part 1) in the Cooking Up a Network Manager series and also services as the **starter project** for the 2nd video.
 
