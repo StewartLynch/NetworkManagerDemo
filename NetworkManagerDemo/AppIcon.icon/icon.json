@@ -22,14 +22,14 @@
             {
               "appearance" : "dark",
               "value" : {
-                "solid" : "srgb:0.70297,0.70297,0.70297,1.00000"
+                "solid" : "srgb:0.97253,0.96446,1.00000,1.00000"
               }
             }
           ],
-          "image-name" : "1.circle.fill.png",
-          "name" : "1.circle.fill",
+          "image-name" : "2.circle.fill.png",
+          "name" : "2.circle.fill",
           "position" : {
-            "scale" : 3.78,
+            "scale" : 3.91,
             "translation-in-points" : [
               272.4453125,
               184.54624999999987
