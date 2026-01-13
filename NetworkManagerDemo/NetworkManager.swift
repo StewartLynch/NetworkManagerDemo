@@ -55,7 +55,7 @@ enum TransportError: Error {
             self = .cannotConnect
         case .cancelled:
             self = .cancelled
-        case .secureConnectionFailed, .serverCertificateHasBadDate, .serverCertificateUntrusted, .serverCertificateHasUnknownRoot, .serverCertificateHasBadDate:
+        case .secureConnectionFailed, .serverCertificateHasBadDate, .serverCertificateUntrusted, .serverCertificateHasUnknownRoot, .serverCertificateNotYetValid:
             self = .tlsFailure
         default:
             self = .unknown
