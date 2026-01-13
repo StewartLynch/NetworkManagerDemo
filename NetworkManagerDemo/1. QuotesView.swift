@@ -17,7 +17,7 @@ enum TestURL {
     static let quotesURL = "https://stewartlynch.github.io/Samples/quotes.json"
     static let quotesURLRequestError = "https://invalid.stewartlynch.github.io/Samples/quotes.json"
     static let quotesURLResponseError = "data:text/plain,hello"
-    static let quotesURLStatusError = "https://httpbin.org/status/500"
+    static let quotesURLStatusError = "https://httpbin.org/status/403"
     static let quotesURLBadJSON = "https://stewartlynch.github.io/Samples/errorQuotes.json"
     
     static let jokesURL = "https://stewartlynch.github.io/Samples/jokes.json"
@@ -35,11 +35,12 @@ struct Quote: Decodable, Identifiable {
 import SwiftUI
 
 struct QuotesView: View {
-    @State private var quotes: [Quote]? = nil
+    @State private var quotes: [Quote] = []
     let manager = NetworkManager.shared
+    @State private var networkError: NetworkError? = nil
     var body: some View {
         Group {
-            if let quotes {
+            if !quotes.isEmpty {
                 List(quotes.shuffled()) { quote in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(quote.text)
@@ -62,75 +63,29 @@ struct QuotesView: View {
             }
         }
         .task {
-//            quotes = await fetchAndDecodeQuotes(from: TestURL.quotesURLBadJSON)
-            quotes = await manager.fetchAndDecodeJSON(from: TestURL.quotesURL)
-        }
-    }
-    
-    func fetchAndDecodeQuotes(from url:String) async -> [Quote]? {
-        guard let url = URL(string: url) else {
-            print("Invalid URL")
-            return nil
-        }
-        do {
-            let (data, response) = try await URLSession.shared.data(from: url)
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("Network error: Response was not HTTPURLResponse")
-                return nil
-            }
-            guard (200...299).contains(httpResponse.statusCode) else {
-                print("HTTP error: status code \(httpResponse.statusCode)")
-                return nil
-            }
             do {
-                let decoder = JSONDecoder()
-                return try decoder.decode([Quote].self, from: data)
-            } catch let error as DecodingError {
-                print(decodingError(error: error))
-                return nil
+                quotes = try await manager.fetchAndDecodeJSON(from: TestURL.quotesURL)
+            } catch let error as NetworkError {
+                networkError = error
             } catch {
-                print("Decoding error: \(error.localizedDescription)")
-                print("Data as string: \(String(data: data, encoding: .utf8) ?? "")")
-                return nil
+                print(error.localizedDescription)
             }
-        } catch {
-            print("Request error \(error.localizedDescription)")
-            return nil
         }
-        
-    }
-    
-    func decodingError(error: DecodingError) -> String {
-        switch error {
-        case .typeMismatch(let type, let context):
-            """
-            Decoding Error: Type mismatch for type \(type)
-            Context: \(context.debugDescription)
-            Coding path: \(context.codingPath.map { $0.stringValue}.joined(separator: " -> "))
-            """
-        case .valueNotFound(let type, let context):
-            """
-            Decoding Error: Value of type \(type) not found
-            Context: \(context.debugDescription)
-            Coding path: \(context.codingPath.map { $0.stringValue}.joined(separator: " -> "))
-            """
-        case .keyNotFound(let codingKey, let context):
-            """
-            Decoding Error: Key '\(codingKey.stringValue)' not found
-            Context: \(context.debugDescription)
-            Coding path: \(context.codingPath.map { $0.stringValue}.joined(separator: " -> "))
-            """
-        case .dataCorrupted(let context):
-            """
-            Decoding Error: Data corrupted
-            Context: \(context.debugDescription)
-                Coding path: \(context.codingPath.map { $0.stringValue}.joined(separator: " -> "))
-            """
-        @unknown default:
-            """
-            Unkown error: \(error.localizedDescription)
-            """
-        }
+        .alert(
+            "Unable to load quotes",
+            isPresented: Binding(get: {
+                networkError != nil
+            }, set: { value in
+                if !value { networkError = nil}
+            }),
+            presenting: networkError) { _ in
+                Button("OK") {
+                    
+                }
+            } message: { networkError in
+                Text(networkError.userMessage)
+            }
+
     }
 }
 
