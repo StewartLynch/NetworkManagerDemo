@@ -35,12 +35,10 @@ struct Quote: Decodable, Identifiable {
 import SwiftUI
 
 struct QuotesView: View {
-    @State private var quotes: [Quote] = []
-    let manager = NetworkManager.shared
-    @State private var networkError: NetworkError? = nil
+    @State private var viewModel = DataViewModel<[Quote]>(urlString: TestURL.quotesURL)
     var body: some View {
         Group {
-            if !quotes.isEmpty {
+            if let quotes = viewModel.data, !quotes.isEmpty {
                 List(quotes.shuffled()) { quote in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(quote.text)
@@ -58,27 +56,27 @@ struct QuotesView: View {
                     .padding(.vertical, 4)
                 }
                 .listStyle(.plain)
+                .refreshable {
+                    Task {
+                        await viewModel.fetchData()
+                    }
+                }
             } else {
                 ContentUnavailableView("No Quotes available", systemImage: "quote.closing")
             }
         }
+        .withLoader(isLoading: viewModel.isLoading, title: "quotes")
         .task {
-            do {
-                quotes = try await manager.fetchAndDecodeJSON(from: TestURL.quotesURL)
-            } catch let error as NetworkError {
-                networkError = error
-            } catch {
-                print(error.localizedDescription)
-            }
+            await viewModel.fetchData()
         }
         .alert(
             "Unable to load quotes",
             isPresented: Binding(get: {
-                networkError != nil
+                viewModel.networkError != nil
             }, set: { value in
-                if !value { networkError = nil}
+                if !value { viewModel.networkError = nil}
             }),
-            presenting: networkError) { _ in
+            presenting: viewModel.networkError) { _ in
                 Button("OK") {
                     
                 }

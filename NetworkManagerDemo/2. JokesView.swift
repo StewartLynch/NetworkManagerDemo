@@ -23,12 +23,10 @@ struct Joke:Identifiable, Codable {
 }
 
 struct JokesView: View {
-    @State private var jokes: [Joke] = []
-    let manager = NetworkManager.shared
-    @State private var networkError: NetworkError? = nil
+    @State private var viewModel = DataViewModel<[Joke]>(urlString: TestURL.jokesURL)
     var body: some View {
         Group {
-            if !jokes.isEmpty {
+            if let jokes = viewModel.data, !jokes.isEmpty {
                 List(jokes.shuffled()) { joke in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(joke.setup)
@@ -42,23 +40,23 @@ struct JokesView: View {
                 ContentUnavailableView("No Jokes available", systemImage: "hand.thumbsdown.fill")
             }
         }
-        .task {
-            do {
-                jokes = try await manager.fetchAndDecodeJSON(from: TestURL.jokesURL)
-            } catch let error as NetworkError {
-                networkError = error
-            } catch {
-                print(error.localizedDescription)
+        .withLoader(isLoading: viewModel.isLoading, title: "jokes")
+        .refreshable {
+            Task {
+                await viewModel.fetchData()
             }
+        }
+        .task {
+            await viewModel.fetchData()
         }
         .alert(
             "Unable to load jokes",
             isPresented: Binding(get: {
-                networkError != nil
+                viewModel.networkError != nil
             }, set: { value in
-                if !value { networkError = nil}
+                if !value { viewModel.networkError = nil}
             }),
-            presenting: networkError) { _ in
+            presenting: viewModel.networkError) { _ in
                 Button("OK") {
                     
                 }

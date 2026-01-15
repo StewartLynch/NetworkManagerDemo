@@ -23,12 +23,12 @@ struct Joke2:Identifiable, Codable {
 }
 
 struct JokesView2: View {
-    @State private var jokes: [Joke2] = []
-    @State private var networkError: NetworkError? = nil
-    let manager = NetworkManager.shared
+    @State private var viewModel = DataViewModel<[Joke2]>(urlString: TestURL.jokesURL) { decoder in
+        decoder.dateDecodingStrategy = .iso8601
+    }
     var body: some View {
         Group {
-            if !jokes.isEmpty {
+            if let jokes = viewModel.data, !jokes.isEmpty {
                 List(jokes.shuffled()) { joke in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(joke.setup)
@@ -40,30 +40,27 @@ struct JokesView2: View {
                     .padding(.vertical, 4)
                 }
                 .listStyle(.plain)
+                .refreshable {
+                    Task {
+                       await viewModel.fetchData()
+                    }
+                }
             } else {
                 ContentUnavailableView("No Jokes available", systemImage: "hand.thumbsdown.fill")
             }
         }
+        .withLoader(isLoading: viewModel.isLoading, title: "jokes")
         .task {
-//            jokes = await manager.fetchAndDecodeJSON(from: TestURL.jokesURL)
-            do {
-                jokes = try await manager.fetchAndDecodeJSON(from: TestURL.jokesURL) { decoder in
-                    decoder.dateDecodingStrategy = .iso8601
-                }
-            } catch let error as NetworkError {
-                networkError = error
-            } catch {
-                print(error.localizedDescription)
-            }
+            await viewModel.fetchData()
         }
         .alert(
             "Unable to load jokes",
             isPresented: Binding(get: {
-                networkError != nil
+                viewModel.networkError != nil
             }, set: { value in
-                if !value { networkError = nil}
+                if !value {  viewModel.networkError = nil}
             }),
-            presenting: networkError) { _ in
+            presenting:  viewModel.networkError) { _ in
                 Button("OK") {
                     
                 }
