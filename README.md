@@ -2,7 +2,7 @@
 
 ![AppIcon128](Images/AppIcon128.png) This is the **completed Source Code** for the **3rd video (Part 3)** in the Cooking Up a Network Manager series .
 
-Release Date: March 8 2026
+Release Date: March 15, 2026
 
 If you want to support my work, you can - </br>
 
