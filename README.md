@@ -2,7 +2,7 @@
 
 ![AppIcon128](Images/AppIcon128.png) This is the **starter project** for the 1st video in the Cooking Up a Network Manager series
 
-Release Date: Feb 15, 2026
+Release Date: Mar 1, 2026
 
 If you want to support my work, you can - </br>
 
