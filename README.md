@@ -2,7 +2,9 @@
 
 ![AppIcon128](Images/AppIcon128.png) This is the **completed Source Code** for the **1st video (Part 1)** in the Cooking Up a Network Manager series and also services as the **starter project** for the 2nd video.
 
-Release Date: Mar 8, 2026
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=9H0gc-smKiA
+" target="_blank"><img src="http://img.youtube.com/vi/9H0gc-smKiA/0.jpg" 
+alt="Part 2" width="480" height="360" border="1" /></a>
 
 If you want to support my work, you can - </br>
 
