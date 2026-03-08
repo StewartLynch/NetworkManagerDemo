@@ -2,7 +2,9 @@
 
 ![AppIcon128](Images/AppIcon128.png) This is the **completed Source Code** for the **3rd video (Part 3)** in the Cooking Up a Network Manager series .
 
-Release Date: March 15, 2026
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=7athP98-HEU
+" target="_blank"><img src="http://img.youtube.com/vi/7athP98-HEU/0.jpg" 
+alt="Part 3" width="480" height="360" border="1" /></a>
 
 If you want to support my work, you can - </br>
 
